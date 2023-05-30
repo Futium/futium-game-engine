@@ -1,0 +1,2 @@
+C:\Users\comur\Documents\GitHub\futium-game-engine\x64\Debug\futium-game-engine.exe
+C:\Users\comur\Documents\GitHub\futium-game-engine\x64\Debug\futium-game-engine.pdb
