@@ -32,19 +32,6 @@ int main() {
 	// only modern GLFW functions (CORE profile)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// array of datatype GLfloat
-	// every 3 floats will represent one coord
-
-	// equilateral triangle
-	GLfloat vertices[] =
-	{
-		// left corner
-		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,
-		// right corner
-		0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,
-		// top corner
-		0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f
-	};
 
 	// create window				(width, height, "Name of Window", fullScreenOrNot, NULL
 	GLFWwindow* window = glfwCreateWindow(800, 800, "Futium Game Engine", NULL, NULL);
@@ -94,11 +81,38 @@ int main() {
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+	// array of datatype GLfloat
+	// every 3 floats will represent one coord
+
+	// equilateral triangle
+	GLfloat vertices[] =
+	{
+		// left corner
+		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,
+		// right corner
+		0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,
+		// top corner
+		0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f,
+		// inner left
+		-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f,
+		0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // inner right
+		0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f // inner down
+	};
+
+	GLuint indices[] =
+	{
+		// triangles by points
+		0, 3, 5, // lower left triangle
+		3, 2, 4, // lower right triangle
+		5, 4, 1 // upper triangle
+	};
+
+
 	// when you send info from CPU to GPU, you want to send it in big batches, called buffers 
 	// not like front and end buffers below
 	// so we create vertexBuffer obj
-
-	GLuint VAO, VBO;
+	// EBO is index buffer
+	GLuint VAO, VBO, EBO;
 
 	// ORDER MATTERS, MUST BE BEFORE VBO
 	// VAOs allow you to quickly switch between different VBOs
@@ -107,6 +121,7 @@ int main() {
 	// binding makes a certain object the current obj
 	// if you make a function that modifies the certain object it modifies the current obj
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
 	// bind VAO so we can work with it
 	glBindVertexArray(VAO);
@@ -125,6 +140,10 @@ int main() {
 	// copy - vertices will be copied
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+	// make it current
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 
 	// configure VAO
 	// 1. Position index of vertex attrib which allows us to communicate with the vertex shader from the outside
@@ -140,6 +159,10 @@ int main() {
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	// make sure EBO is unbound AFTER VAO since EBO is stored in VAO
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 
 
 	// swap the front buffer with back buffer
@@ -163,8 +186,8 @@ int main() {
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
 
-		// (type of primitive, starting index of vert, amount of vertices)
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		// (type of primitive, # of indices to draw, datatype of indice, starting index)
+		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 
 		// swap the buffers so the image gets updated each frame
 		glfwSwapBuffers(window);
@@ -176,6 +199,7 @@ int main() {
 	// delete the objs we created
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 	glDeleteProgram(shaderProgram);
 
 
@@ -187,4 +211,3 @@ int main() {
 
 	return 0;
 }
-

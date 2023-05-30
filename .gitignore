@@ -3,8 +3,10 @@
 *.log
 *.pdb
 *.idb
-*.pdb
 *.exe
+*.tlog
+*.obj
+*.suo
 futium-game-engine.vcxproj.FileListAbsolute.txt
 futium-game-engine.vcxproj
 .lastbuildstate
